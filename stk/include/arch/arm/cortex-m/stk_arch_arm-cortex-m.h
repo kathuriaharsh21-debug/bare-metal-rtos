@@ -1,0 +1,160 @@
+/*
+ * SuperTinyKernel(TM) RTOS: Lightweight High-Performance Deterministic C++ RTOS for Embedded Systems.
+ *
+ * Source: https://github.com/SuperTinyKernel-RTOS
+ *
+ * Copyright (c) 2022-2026 Neutron Code Limited <stk@neutroncode.com>. All Rights Reserved.
+ * License: MIT License, see LICENSE for a full text.
+ */
+
+#ifndef STK_ARCH_ARM_CORTEX_M_H_
+#define STK_ARCH_ARM_CORTEX_M_H_
+
+#include "stk_common.h"
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE != 0)
+    #include <arm_cmse.h> // for ARM TrustZone
+#endif
+
+/*! \file  stk_arch_arm-cortex-m.h
+    \brief Platform port for ARM Cortex-M.
+*/
+
+namespace stk {
+
+/*! \class PlatformArmCortexM
+    \brief Concrete implementation of IPlatform driver for the Arm Cortex-M0, M3, M4, M7 processors.
+*/
+class PlatformArmCortexM final : public IPlatform
+{
+public:
+    /*! \brief Destructor.
+        \note  MISRA deviation: [STK-DEV-005] Rule 10-3-2.
+    */
+    STK_VIRT_DTOR ~PlatformArmCortexM() = default;
+
+    void Initialize(IEventHandler *event_handler, IKernelService *service, uint32_t resolution_us, Stack *exit_trap) override;
+    void Start() override;
+    void Stop() override;
+    void InitStack(EStackType stack_type, Stack *stack, IStackMemory *stack_memory, ITask *user_task) override;
+    uint32_t GetTickResolution() const override;
+    Cycles GetSysTimerCount() const override;
+    uint32_t GetSysTimerFrequency() const override;
+    void SwitchToNext() override;
+    void Sleep(Timeout ticks) override;
+    bool SleepUntil(Ticks timestamp) override;
+    EWaitResult Wait(ISyncObject *sync_obj, IMutex *mutex, Timeout timeout) override;
+    void ProcessTick() override;
+    void ProcessHardFault() override;
+    void SetEventOverrider(IEventOverrider *overrider) override;
+    Word GetCallerSP() const override;
+    TId GetTid() const override;
+    Timeout Suspend() override;
+    void Resume(Timeout elapsed_ticks) override;
+};
+
+/*! \typedef PlatformDefault
+    \brief   Default platform implementation.
+*/
+typedef PlatformArmCortexM PlatformDefault;
+
+// Inline TLS via r9. Active when both STK_TLS and STK_TLS_PREFER_REGISTER are
+// enabled. Requires -ffixed-r9 on all translation units containing task code
+// (see GetTls/SetTls warnings below). If -ffixed-r9 is unavailable or
+// undesirable, leave STK_TLS_PREFER_REGISTER disabled; the kernel will fall back
+// to a memory-based TLS slot with a small additional load/store per access.
+#if STK_TLS && STK_TLS_PREFER_REGISTER
+
+/*! \brief   Get thread-local storage (TLS).
+    \return  TLS value.
+    \note    Uses r9 as the TLS base pointer per the ARM EABI "platform register"
+             convention (AAPCS 5.2.2).  The value is saved and restored by PendSV
+             on every context switch, so each task sees its own TLS pointer on entry.
+    \warning **Requires \c -ffixed-r9 for every translation unit that contains task
+             code** - including any library code a task calls that touches r9.
+             Without it, the compiler treats r9 as an ordinary callee-saved register:
+             it may spill r9 to the stack in a function prologue, overwrite it with an
+             intermediate value (e.g. during 64-bit arithmetic), and restore it in the
+             epilogue.
+    \see     SetTls, stk::hw::GetTlsPtr, stk::hw::SetTlsPtr
+*/
+static __stk_forceinline Word GetTls()
+{
+    Word tp;
+    __asm volatile("MOV %0, r9" : "=r"(tp) : /* input: none */ : /* clobbers: none */);
+    return tp;
+}
+
+/*! \brief     Set thread-local storage (TLS).
+    \param[in] tp: TLS value to store in r9.
+    \note      Uses the r9 register as the TLS base pointer, following the ARM EABI
+               "platform register" convention (AAPCS §5.2.2).
+    \warning   **Requires \c -ffixed-r9 for every translation unit that contains task
+               code.** See \c GetTls() for the full explanation.
+    \see       GetTls, stk::hw::GetTlsPtr, stk::hw::SetTlsPtr
+*/
+static __stk_forceinline void SetTls(Word tp)
+{
+    __asm volatile("MOV r9, %0" : /* output: none */ : "r"(tp) : /* clobbers: none */);
+}
+
+// Notify stk_arch.h that we defined inline versions of GetTls/SetTls.
+#define STK_INLINE_TLS 1
+
+#endif // STK_TLS_PREFER_REGISTER
+
+} // namespace stk
+
+/*! \brief Hardware memory barrier: ensures visibility across cores and bus masters.
+*/
+static __stk_forceinline void __stk_dmb() { __asm volatile("dmb sy" ::: "memory"); }
+
+/*! \def   STK_TZ_SECURE
+    \brief ARM TrustZone: Defines Secure (1) build.
+*/
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3)
+    #define STK_TZ_SECURE (1)
+#else
+    #define STK_TZ_SECURE (0)
+#endif
+
+/*! \def   STK_TZ_NON_SECURE
+    \brief ARM TrustZone: Defines Non-Secure (1) build.
+*/
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 1)
+    #define STK_TZ_NON_SECURE (1)
+#else
+    #define STK_TZ_NON_SECURE (0)
+#endif
+
+/*! \def   __stk_tz_nsc_entry
+    \brief ARM TrustZone: attribute for Non-Secure callable gateway functions.
+    \note  Places the function in the .nsc_entry section mapped to the NSC region.
+*/
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3)
+    #define __stk_tz_nsc_entry __attribute__((cmse_nonsecure_entry))
+#else
+    #define __stk_tz_nsc_entry
+#endif
+
+/*! \def   __stk_tz_ns_call
+    \brief ARM TrustZone: attribute for calling Non-Secure functions from Secure state.
+*/
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3)
+    #define __stk_tz_ns_call __attribute__((cmse_nonsecure_call))
+#else
+    #define __stk_tz_ns_call
+#endif
+
+/*! \def   STK_NSC_GATEWAY
+    \brief ARM TrustZone: Non-secure gateway to Secure API.
+*/
+#define STK_TZ_NSC_GATEWAY extern "C" __stk_tz_nsc_entry
+
+// ARM TrustZone Non-Secure binary configuration validation.
+#ifdef _STK_CORTEX_M_TRUSTZONE_NON_SECURE
+#if !STK_TZ_NON_SECURE
+    #error "Switch of -cmse compiler flag for Non-Secure binary!"
+#endif
+#endif
+
+#endif /* STK_ARCH_ARM_CORTEX_M_H_ */

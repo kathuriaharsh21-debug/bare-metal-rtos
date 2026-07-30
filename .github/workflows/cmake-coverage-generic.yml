@@ -1,0 +1,65 @@
+name: Code Coverage - Generic
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request_target:
+    branches: [ "main" ]
+  
+env:
+  PASS_THRESHOLD: 100
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      repository-projects: write
+
+    steps:
+    - name: Cache LCOV
+      uses: actions/cache@v3
+      id: lcov-cache
+      with:
+        path: /usr/bin/lcov
+        key: lcov-${{ runner.os }}-v1
+
+    - name: Install LCOV (if missing)
+      if: steps.lcov-cache.outputs.cache-hit != 'true'
+      run: sudo apt update && sudo apt install -y lcov
+    
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    
+    - name: Generate Code Coverage
+      run: |
+        ./coverage.sh \
+          -s . \
+          -b ${{ github.workspace }}/cov-build \
+          -o ${{ github.workspace }}/cov-report \
+          -f ${{ github.workspace }}/cov-build/coverage.info
+
+    - name: Filter Coverage Info
+      run: |
+        lcov --remove ${{ github.workspace }}/cov-build/coverage.info \
+        '*/stk_sync_cv.h' \
+        '*/stk_sync_event.h' \
+        '*/stk_sync_mutex.h' \
+        '*/stk_sync_pipe.h' \
+        '*/stk_sync_rwmutex.h' \
+        '*/stk_sync_semaphore.h' \
+        '*/stk_sync_spinlock.h' \
+        -o ${{ github.workspace }}/cov-build/coverage.info
+
+    - name: Report Code Coverage with Pass Threshold - ${{env.PASS_THRESHOLD}}%
+      uses: zgosalvez/github-actions-report-lcov@v4
+      with:
+        coverage-files: ${{github.workspace}}/cov-build/coverage.info
+        minimum-coverage: ${{env.PASS_THRESHOLD}}
+        artifact-name: code-coverage-report
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        working-directory: ./

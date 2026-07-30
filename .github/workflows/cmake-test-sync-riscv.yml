@@ -1,0 +1,160 @@
+name: Test - All stk::sync (QEMU, RISC-V)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  BUILD_TYPE: Release
+  GCC_VERSION: 15.2.0-1.1
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-22.04
+    name: "Build QEMU Docker image"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: build/test/qemu/Dockerfile.riscv32
+        tags: stk-qemu-riscv:latest
+        load: false
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        outputs: type=docker,dest=/tmp/stk-qemu-riscv.tar
+
+    - name: Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: stk-qemu-riscv-image
+        path: /tmp/stk-qemu-riscv.tar
+        retention-days: 1
+
+  build:
+    needs: docker-build
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - name: sync::Event
+            cmake_flag: TEST_EVENT=ON
+            elf: test-event.elf
+            dir: event
+            
+          - name: sync::EventFlags
+            cmake_flag: TEST_EVENTFLAGS=ON
+            elf: test-eventflags.elf
+            dir: eventflags
+
+          - name: sync::Mutex
+            cmake_flag: TEST_MUTEX=ON
+            elf: test-mutex.elf
+            dir: mutex
+
+          - name: sync::Pipe
+            cmake_flag: TEST_PIPE=ON
+            elf: test-pipe.elf
+            dir: pipe
+
+          - name: sync::RWMutex
+            cmake_flag: TEST_RWMUTEX=ON
+            elf: test-rwmutex.elf
+            dir: rwmutex
+
+          - name: sync::Semaphore
+            cmake_flag: TEST_SEMAPHORE=ON
+            elf: test-semaphore.elf
+            dir: semaphore
+
+          - name: sync::SpinLock
+            cmake_flag: TEST_SPINLOCK=ON
+            elf: test-spinlock.elf
+            dir: spinlock
+
+          - name: sync::ConditionVariable
+            cmake_flag: TEST_CONDVAR=ON
+            elf: test-condvar.elf
+            dir: condvar
+            
+          - name: sync::MessageQueue
+            cmake_flag: TEST_MSGQUEUE=ON
+            elf: test-msgqueue.elf
+            dir: msgqueue
+
+        board:
+          - name: "Generic"
+            cmake_flags: -DTARGET_RV32I=ON
+            cpu: rv32
+            board: virt
+
+    runs-on: ubuntu-22.04
+
+    name: "${{matrix.test.name}} / ${{matrix.board.name}}"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Cache xPacks
+      id: cache-xpack
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/xPacks
+        key: ${{ runner.os }}-xpack-riscv-${{ env.GCC_VERSION }}
+
+    - name: Install xPack RISC-V GCC
+      run: |
+        npm install --location=global xpm@latest
+        xpm install --global @xpack-dev-tools/riscv-none-elf-gcc@${{ env.GCC_VERSION }}
+        echo "$HOME/.local/xPacks/@xpack-dev-tools/riscv-none-elf-gcc/${{ env.GCC_VERSION }}/.content/bin" >> $GITHUB_PATH
+
+    - name: GCC version
+      run: riscv-none-elf-gcc --version
+
+    - name: Configure CMake
+      run: >
+        cmake -G "Unix Makefiles"
+        -B ${{github.workspace}}/build
+        -DCMAKE_TOOLCHAIN_FILE=build/cmake/toolchain/riscv-none-elf-gcc.cmake
+        ${{matrix.board.cmake_flags}}
+        -DENABLE_LTO=ON
+        -DENABLE_SMALL=ON
+        -DBUILD_LIB=ON
+        -DBUILD_TESTS=ON
+        -DTEST_GENERIC=OFF
+        -D${{matrix.test.cmake_flag}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 4
+
+    - name: Download Docker image artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: stk-qemu-riscv-image
+        path: /tmp
+
+    - name: Load Docker image
+      run: docker load --input /tmp/stk-qemu-riscv.tar
+
+    - name: Prepare
+      run: chmod +x build/test/qemu/stk-qemu.sh && chmod +x build/test/qemu/test.sh
+
+    - name: Test (${{matrix.test.name}})
+      run: >
+        sh build/test/qemu/test.sh
+        stk-qemu-riscv:latest
+        qemu-system-riscv32
+        ${{matrix.board.cpu}}
+        ${{matrix.board.board}}
+        ${{github.workspace}}/build/test/${{matrix.test.dir}}
+        ${{matrix.test.elf}}

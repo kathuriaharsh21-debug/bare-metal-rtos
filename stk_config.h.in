@@ -1,0 +1,51 @@
+/*
+ * SuperTinyKernel(TM) RTOS: Lightweight High-Performance Deterministic C++ RTOS for Embedded Systems.
+ *
+ * Source: https://github.com/SuperTinyKernel-RTOS
+ *
+ * Copyright (c) 2022-2026 Neutron Code Limited <stk@neutroncode.com>. All Rights Reserved.
+ * License: MIT License, see LICENSE for a full text.
+ */
+
+#ifndef STK_CONFIG_H_
+#define STK_CONFIG_H_
+
+// note: Replace below includes with includes provided by the vendor of your board.
+// note: Rename this file to stk_config.h and place to your project folder which references includes (normally where main.cpp is, see /example).
+
+// Device-specific include file, example for NXP K66 MCU:
+//#include "MK66F18.h"
+//#include "cmsis_device.h"
+#cmakedefine _STK_DEVICE_INC "@_STK_DEVICE_INC@"
+#ifdef _STK_DEVICE_INC
+#include _STK_DEVICE_INC
+#endif
+
+// Define for Arm Cortex-M4 MCU
+#cmakedefine _STK_ARCH_ARM_CORTEX_M
+
+// Define for RISC-V
+#cmakedefine _STK_ARCH_RISC_V
+
+// Define for x86, Windows
+#cmakedefine _STK_ARCH_X86_WIN32
+
+//  ISR handlers
+#if defined(_STK_ARCH_ARM_CORTEX_M) || defined(_STK_ARCH_RISC_V)
+    // Redefine if SysTick handler name is different from SysTick_Handler
+    #cmakedefine STK_SYSTICK_HANDLER @STK_SYSTICK_HANDLER@
+
+    // Redefine if PendSv handler name is different from PendSV_Handler
+    #cmakedefine STK_PENDSV_HANDLER @STK_PENDSV_HANDLER@
+
+    // Redefine if SVC handler name is different from SVC_Handler
+    #cmakedefine STK_SVC_HANDLER @STK_SVC_HANDLER@
+#endif
+
+// Tickless mode
+#cmakedefine STK_TICKLESS_IDLE @STK_TICKLESS_IDLE@
+
+// TLS
+#cmakedefine STK_TLS @STK_TLS@
+
+#endif /* STK_CONFIG_H_ */

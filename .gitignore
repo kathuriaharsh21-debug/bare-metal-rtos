@@ -1,0 +1,11 @@
+/Debug/
+Debug
+Release
+build/
+build-*/
+.settings
+.idea
+doxydoc
+*.launch
+.vs
+*.vcxproj.user

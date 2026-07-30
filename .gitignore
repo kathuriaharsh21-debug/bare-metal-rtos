@@ -1,8 +1,9 @@
 /Debug/
 Debug
 Release
-build/
+# CMake build output directories (not the build infrastructure)
 build-*/
+build/out/
 .settings
 .idea
 doxydoc

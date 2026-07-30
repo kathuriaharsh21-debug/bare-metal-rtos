@@ -157,7 +157,9 @@ public:
     */
     static constexpr size_t AlignBlockSize(size_t raw_size)
     {
-        return Max(static_cast<size_t>(BLOCK_ALIGN), (raw_size + (BLOCK_ALIGN - 1U)) & ~static_cast<size_t>(BLOCK_ALIGN - 1U));
+        return ((raw_size + (BLOCK_ALIGN - 1U)) & ~(static_cast<size_t>(BLOCK_ALIGN) - 1U)) < static_cast<size_t>(BLOCK_ALIGN)
+            ? static_cast<size_t>(BLOCK_ALIGN)
+            : ((raw_size + (BLOCK_ALIGN - 1U)) & ~(static_cast<size_t>(BLOCK_ALIGN) - 1U));
     }
 
     /*! \brief     Allocate one block, blocking until one becomes available or the timeout expires.

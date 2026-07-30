@@ -131,8 +131,8 @@ TEST(KernelService, GetTickResolution)
     kernel.AddTask(&task);
     kernel.Start();
 
-    CHECK_EQUAL(periodicity, g_KernelService->GetTickResolution());
-    CHECK_EQUAL(periodicity, stk::GetTickResolution());
+    CHECK_EQUAL((int32_t)periodicity, (int32_t)g_KernelService->GetTickResolution());
+    CHECK_EQUAL((int32_t)periodicity, (int32_t)stk::GetTickResolution());
 }
 
 TEST(KernelService, GetTicks)

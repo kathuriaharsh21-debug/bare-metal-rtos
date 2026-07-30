@@ -91,14 +91,16 @@ void stk::hw::SpinLock::Unlock()
     m_lock = false;
 }
 
-uintptr_t stk::hw::GetTls()
+namespace stk { namespace hw {
+uintptr_t GetTls()
 {
     return g_Tls;
 }
-void stk::hw::SetTls(uintptr_t tp)
+void SetTls(uintptr_t tp)
 {
     g_Tls = tp;
 }
+}} // namespace stk::hw
 
 bool stk::hw::IsInsideISR()
 {

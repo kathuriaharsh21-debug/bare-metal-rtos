@@ -98,7 +98,7 @@ private:
                 if (current > g_MaxConcurrent)
                     g_MaxConcurrent = current;
 
-                stk::Sleep(_STK_RWMUTEX_TEST_SHORT_SLEEP);
+                stk::Sleep(_STK_RWMUTEX_TEST_LONG_SLEEP);
 
                 --g_ReaderCount;
             }

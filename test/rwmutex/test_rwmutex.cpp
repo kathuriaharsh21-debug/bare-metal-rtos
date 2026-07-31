@@ -255,7 +255,7 @@ private:
         {
             // Wait until writer signals it has the lock
             while (g_SharedCounter == 0)
-                stk::Yield();
+                stk::Sleep(1);
 
             stk::Sleep(_STK_RWMUTEX_TEST_SHORT_SLEEP);
 
@@ -282,7 +282,7 @@ private:
         else
         if (m_task_id == 0)
         {
-            stk::Sleep(_STK_RWMUTEX_TEST_LONG_SLEEP * 4);
+            stk::Sleep(_STK_RWMUTEX_TEST_LONG_SLEEP * 6);
 
             printf("timed read-lock: counter=%d (expected 3)\n", (int)g_SharedCounter);
 

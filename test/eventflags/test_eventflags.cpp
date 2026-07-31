@@ -224,6 +224,7 @@ private:
         if (m_task_id == 2)
         {
             // Wait for FLAG_A after it was cleared: must time out
+            stk::Sleep(5);
             uint32_t result = g_Flags.Wait(FLAG_A, sync::EventFlags::OPT_WAIT_ANY, _STK_EF_TEST_SHORT_SLEEP);
 
             // A timeout is the expected outcome here; a non-error result is a failure

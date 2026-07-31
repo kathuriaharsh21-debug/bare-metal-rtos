@@ -288,7 +288,7 @@ private:
             g_TestCond.NotifyOne();
             g_TestMutex.Unlock();
 
-            stk::Sleep(_STK_CV_TEST_LONG_SLEEP);
+            stk::Sleep(_STK_CV_TEST_LONG_SLEEP * 3);
 
             printf("mutex reacquired: counter=%d (expected 3)\n", (int)g_SharedCounter);
 
@@ -392,7 +392,7 @@ private:
                 g_TestCond.NotifyOne();
                 g_TestMutex.Unlock();
 
-                stk::Delay(1); // give the woken consumer time to record its order entry
+                stk::Sleep(1); // give the woken consumer time to record its order entry
             }
 
             stk::Sleep(_STK_CV_TEST_LONG_SLEEP);

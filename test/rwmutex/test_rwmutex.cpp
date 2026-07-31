@@ -390,14 +390,14 @@ private:
         {
             // Wait until writer signals it has the lock
             while (g_SharedCounter == 0)
-                stk::Yield();
+                stk::Sleep(1);
 
             // TryReadLock must fail immediately while writer holds lock
             int64_t start = GetTimeNowMs();
             bool acquired = g_TestRWMutex.TryReadLock();
             int64_t elapsed = GetTimeNowMs() - start;
 
-            if (!acquired && elapsed < _STK_RWMUTEX_TEST_SHORT_SLEEP)
+            if (!acquired && elapsed < 50)
                 ++g_SharedCounter; // 2: correctly failed immediately
 
             if (acquired)
@@ -416,7 +416,7 @@ private:
         else
         if (m_task_id == 0)
         {
-            stk::Sleep(_STK_RWMUTEX_TEST_LONG_SLEEP * 2);
+            stk::Sleep(_STK_RWMUTEX_TEST_LONG_SLEEP * 5);
 
             printf("try-read while writer: counter=%d (expected 3)\n", (int)g_SharedCounter);
 

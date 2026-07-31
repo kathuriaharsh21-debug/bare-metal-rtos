@@ -438,7 +438,7 @@ private:
         if (m_task_id == 0)
         {
             // Wait for all four producers and consumers to finish
-            while (g_InstancesDone < (_STK_PIPE_TEST_TASKS_MAX - 1))
+            while (g_InstancesDone < _STK_PIPE_TEST_TASKS_MAX)
                 stk::Sleep(_STK_PIPE_TEST_SHORT_SLEEP);
 
             int32_t expected = 2 * m_iterations; // two consumers * m_iterations reads each

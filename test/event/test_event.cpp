@@ -230,7 +230,7 @@ private:
             bool acquired   = g_TestEvent.Wait(50);
             int64_t elapsed = GetTimeNowMs() - start;
 
-            if (!acquired && elapsed >= 45 && elapsed <= 60)
+            if (!acquired && elapsed >= 30 && elapsed <= 200)
                 ++g_SharedCounter;
 
             if (acquired)

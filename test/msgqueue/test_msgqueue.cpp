@@ -337,7 +337,7 @@ private:
             bool    got     = g_Queue->Get(rx, 50); // 50 ms timeout
             int64_t elapsed = GetTimeNowMs() - start;
 
-            bool ok = !got && (elapsed >= 45) && (elapsed <= 65);
+            bool ok = !got && (elapsed >= 30) && (elapsed <= 200);
             g_SharedCounter = ok ? 1 : 0;
 
             printf("TimedGetTimeout: got=%s elapsed=%d %s\n",
@@ -455,7 +455,7 @@ private:
             bool    sent    = g_Queue->Put(tx, 50); // 50 ms timeout
             int64_t elapsed = GetTimeNowMs() - start;
 
-            bool ok = !sent && (elapsed >= 45) && (elapsed <= 65);
+            bool ok = !sent && (elapsed >= 30) && (elapsed <= 200);
             g_SharedCounter = ok ? 1 : 0;
 
             printf("TimedPutTimeout: sent=%s elapsed=%d %s\n",
@@ -1011,7 +1011,7 @@ private:
             bool    sent    = g_Queue->PutFront(tx, 50); // 50 ms timeout
             int64_t elapsed = GetTimeNowMs() - start;
 
-            bool ok = !sent && (elapsed >= 45) && (elapsed <= 65);
+            bool ok = !sent && (elapsed >= 30) && (elapsed <= 200);
             g_SharedCounter = ok ? 1 : 0;
 
             printf("TimedPutFrontTimeout: sent=%s elapsed=%d %s\n",

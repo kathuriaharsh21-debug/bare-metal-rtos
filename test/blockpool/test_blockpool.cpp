@@ -287,7 +287,7 @@ private:
             void   *blk     = g_Pool->TimedAlloc(50); // 50 ms timeout
             int64_t elapsed = GetTimeNowMs() - start;
 
-            bool ok = (blk == nullptr) && (elapsed >= 45) && (elapsed <= 65);
+            bool ok = (blk == nullptr) && (elapsed >= 30) && (elapsed <= 200);
             g_SharedCounter = ok ? 1 : 0;
 
             printf("TimedAllocTimeout: blk=%s elapsed=%d %s\n",

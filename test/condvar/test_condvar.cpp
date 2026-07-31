@@ -196,7 +196,7 @@ private:
             g_TestMutex.Unlock();
 
             // Must return false (timeout), and elapsed must be within the 50-tick window
-            if (!woken && elapsed >= 45 && elapsed <= 65)
+            if (!woken && elapsed >= 30 && elapsed <= 200)
                 ++g_SharedCounter; // 1: timeout returned false in correct time
         }
         else

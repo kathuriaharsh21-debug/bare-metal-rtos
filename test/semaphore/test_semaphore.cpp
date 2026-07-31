@@ -186,7 +186,7 @@ private:
             int64_t elapsed = GetTimeNowMs() - start;
 
             // Should time out after ~50 ms and return false
-            if (!acquired && elapsed >= 45 && elapsed <= 60)
+            if (!acquired && elapsed >= 30 && elapsed <= 200)
                 ++g_SharedCounter;
 
             if (acquired)

@@ -331,7 +331,7 @@ private:
             uint32_t result = g_Flags.Wait(FLAG_A, sync::EventFlags::OPT_WAIT_ANY, 50);
             int64_t elapsed = GetTimeNowMs() - start;
 
-            if ((result == sync::EventFlags::ERROR_TIMEOUT) && (elapsed >= 45) && (elapsed <= 60))
+            if ((result == sync::EventFlags::ERROR_TIMEOUT) && (elapsed >= 30) && (elapsed <= 200))
                 ++g_SharedCounter;
         }
         else

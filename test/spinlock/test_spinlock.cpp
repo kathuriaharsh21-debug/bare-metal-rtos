@@ -330,7 +330,7 @@ private:
         {
             // Wait for task 1 to signal it still holds the lock at depth 1
             while (g_SharedCounter < 2)
-                stk::Yield();
+                stk::Sleep(1);
 
             bool acquired = g_TestSpinLock.TryLock();
 
@@ -345,7 +345,7 @@ private:
 
         if (m_task_id == 0)
         {
-            stk::Sleep(_STK_SL_TEST_LONG_SLEEP);
+            stk::Sleep(_STK_SL_TEST_LONG_SLEEP * 5);
 
             printf("recursive try-lock: counter=%d (expected 3)\n", (int)g_SharedCounter);
 

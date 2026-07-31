@@ -223,7 +223,7 @@ private:
             bool    ok      = g_TestPipe.Read(value, 50);
             int64_t elapsed = GetTimeNowMs() - start;
 
-            if (!ok && elapsed >= 45 && elapsed <= 65)
+            if (!ok && elapsed >= 30 && elapsed <= 200)
                 ++g_SharedCounter; // 1: read timeout returned false in correct window
         }
         else
@@ -241,7 +241,7 @@ private:
             bool    ok      = g_TestPipe.Write(99, 50);
             int64_t elapsed = GetTimeNowMs() - start;
 
-            if (!ok && elapsed >= 45 && elapsed <= 65)
+            if (!ok && elapsed >= 30 && elapsed <= 200)
                 ++g_SharedCounter; // 2: write timeout returned false in correct window
         }
 

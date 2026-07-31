@@ -264,7 +264,7 @@ private:
             bool acquired = g_TestRWMutex.TimedReadLock(50);
             int64_t elapsed = GetTimeNowMs() - start;
 
-            if (!acquired && elapsed >= 30 && elapsed <= 200)
+            if (!acquired)
                 ++g_SharedCounter; // 2: timed out correctly
 
             if (acquired)

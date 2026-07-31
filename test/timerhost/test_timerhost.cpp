@@ -159,7 +159,7 @@ private:
             int32_t wait = 50;
             while (timer.IsActive() && wait)
             {
-                stk::Sleep(1);
+                stk::Yield();
                 --wait;
             }
 

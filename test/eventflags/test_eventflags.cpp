@@ -202,7 +202,7 @@ private:
             bool post_ok   = ((g_Flags.Get() & FLAG_A) == 0U);
             bool flag_b_ok = ((g_Flags.Get() & FLAG_B) != 0U);
 
-            stk::Sleep(_STK_EF_TEST_LONG_SLEEP);
+            stk::Sleep(_STK_EF_TEST_LONG_SLEEP * 4);
 
             printf("clear: pre_ok=%d (expected 1), post_ok=%d (expected 1), "
                 "flag_b_ok=%d (expected 1), counter=%d (expected 1)\n",

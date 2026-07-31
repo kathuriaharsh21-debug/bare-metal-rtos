@@ -429,10 +429,10 @@ private:
             g_TimerHost.StartOrReset(timer, 40, 40);
 
             // StartOrReset is asynchronous, wait for command to process
-            int32_t wait = 50;
+            int32_t wait = 10;
             while (!timer.IsActive() && wait)
             {
-                stk::Sleep(1);
+                stk::Yield();
                 --wait;
             }
 

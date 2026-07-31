@@ -288,7 +288,7 @@ private:
             g_TestCond.NotifyOne();
             g_TestMutex.Unlock();
 
-            stk::Sleep(_STK_CV_TEST_LONG_SLEEP * 3);
+            stk::Sleep(150);
 
             printf("mutex reacquired: counter=%d (expected 3)\n", (int)g_SharedCounter);
 

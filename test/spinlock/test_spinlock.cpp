@@ -321,7 +321,7 @@ private:
             // Signal task 2: task 1 still holds depth 1, task 2 must fail TryLock
             g_SharedCounter = 2;
 
-            stk::Sleep(_STK_SL_TEST_SHORT_SLEEP); // hold for task 2 to attempt
+            stk::Sleep(_STK_SL_TEST_LONG_SLEEP); // hold for task 2 to attempt
 
             g_TestSpinLock.Unlock(); // depth 0 - fully released
         }
@@ -330,7 +330,7 @@ private:
         {
             // Wait for task 1 to signal it still holds the lock at depth 1
             while (g_SharedCounter < 2)
-                stk::Sleep(1);
+                stk::Yield();
 
             bool acquired = g_TestSpinLock.TryLock();
 

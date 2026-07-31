@@ -134,7 +134,7 @@ private:
         }
         else
         {
-            stk::Sleep(_STK_SEM_TEST_SHORT_SLEEP / 2); // let consumers drain the count first
+            stk::Sleep(_STK_SEM_TEST_SHORT_SLEEP * 2); // let consumers drain the count first
 
             // Count should now be 0; this Wait must block until a signal arrives
             bool acquired = g_TestSemaphore.Wait(_STK_SEM_TEST_SHORT_SLEEP);

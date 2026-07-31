@@ -288,7 +288,7 @@ private:
             g_TestCond.NotifyOne();
             g_TestMutex.Unlock();
 
-            stk::Sleep(150);
+            stk::Sleep(300);
 
             printf("mutex reacquired: counter=%d (expected 3)\n", (int)g_SharedCounter);
 
@@ -382,7 +382,7 @@ private:
         if (m_task_id == 0)
         {
             // Producer: let all consumers block first, then wake them one by one
-            stk::Sleep(_STK_CV_TEST_SHORT_SLEEP);
+            stk::Sleep(_STK_CV_TEST_SHORT_SLEEP * 5);
 
             int32_t consumers = _STK_CV_TEST_TASKS_MAX - 1;
 

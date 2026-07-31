@@ -341,7 +341,7 @@ private:
             for (int32_t i = 0; i < (_STK_SEM_TEST_TASKS_MAX - 1); ++i)
             {
                 g_TestSemaphore.Signal();
-                stk::Delay(1); // small pause between signals
+                stk::Sleep(1); // small pause between signals
             }
 
             stk::Sleep(_STK_SEM_TEST_SHORT_SLEEP);

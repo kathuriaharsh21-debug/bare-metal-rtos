@@ -93,7 +93,7 @@ private:
                 g_TestCond.NotifyOne();
                 g_TestMutex.Unlock();
 
-                stk::Delay(1); // pace so each notification wakes exactly one blocked consumer
+                stk::Sleep(1); // pace so each notification wakes exactly one blocked consumer
             }
 
             stk::Sleep(_STK_CV_TEST_LONG_SLEEP);

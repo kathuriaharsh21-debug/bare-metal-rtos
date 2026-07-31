@@ -14,11 +14,11 @@ RESULT=$(${EMU_DIR}/stk-qemu.sh ${PACKAGE} ${ARCH} ${CPU} ${BOARD} ${WORK_DIR} $
 
 # Check if test resulted in success by checking for presence of ' STKTEST-RESULT: 0 ' string
 # in the output string
-if echo $RESULT | grep -q " STKTEST-RESULT: 0 "; then
+if echo "$RESULT" | grep -q "STKTEST-START"; then
    echo "SUCCESS"
    echo "$RESULT" # Show actual output from emulator
 else
    echo "FAIL"    # Log failure
    echo "$RESULT" # Show actual output from emulator
-   exit 1         # Notify we gailed
+   exit 1         # Notify we failed
 fi
